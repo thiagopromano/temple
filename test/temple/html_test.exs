@@ -87,9 +87,7 @@ defmodule Temple.HtmlTest do
         end
 
       assert result ==
-               ~s{<#{unquote(tag)} class="hello"><#{unquote(tag)}></#{unquote(tag)}></#{
-                 unquote(tag)
-               }>}
+               ~s{<#{unquote(tag)} class="hello"><#{unquote(tag)}></#{unquote(tag)}></#{unquote(tag)}>}
     end
   end
 

@@ -1,19 +1,19 @@
 defmodule Temple.Link do
-  alias Phoenix.HTML
+  alias PhoenixHTMLHelpers
   alias Temple.Utils
 
   @moduledoc """
-  This modules wraps all of the functions from the `Phoenix.HTML.Link` module to make them compatible with with Temple.
+  This modules wraps all of the functions from the `PhoenixHTMLHelpers.Link` module to make them compatible with with Temple.
   """
 
   @doc """
-  Please see `Phoenix.HTML.Link.link/2` for details.
+  Please see `PhoenixHTMLHelpers.Link.link/2` for details.
   """
   defmacro phx_link(opts, do: block) do
     quote location: :keep do
       {:safe, link} =
         temple(do: unquote(block))
-        |> HTML.Link.link(unquote(opts))
+        |> PhoenixHTMLHelpers.Link.link(unquote(opts))
 
       Utils.put_buffer(var!(buff, Temple.Html), link)
     end
@@ -21,20 +21,20 @@ defmodule Temple.Link do
 
   defmacro phx_link(content, opts) do
     quote location: :keep do
-      {:safe, link} = HTML.Link.link(unquote_splicing([content, opts]))
+      {:safe, link} = PhoenixHTMLHelpers.Link.link(unquote_splicing([content, opts]))
 
       Utils.put_buffer(var!(buff, Temple.Html), link)
     end
   end
 
   @doc """
-  Please see `Phoenix.HTML.Link.button/2` for details.
+  Please see `PhoenixHTMLHelpers.Link.button/2` for details.
   """
   defmacro phx_button(opts, do: block) do
     quote location: :keep do
       {:safe, link} =
         temple(do: unquote(block))
-        |> HTML.Link.button(unquote(opts))
+        |> PhoenixHTMLHelpers.Link.button(unquote(opts))
 
       Utils.put_buffer(var!(buff, Temple.Html), link)
     end
@@ -42,7 +42,7 @@ defmodule Temple.Link do
 
   defmacro phx_button(content, opts) do
     quote location: :keep do
-      {:safe, link} = HTML.Link.button(unquote_splicing([content, opts]))
+      {:safe, link} = PhoenixHTMLHelpers.Link.button(unquote_splicing([content, opts]))
 
       Utils.put_buffer(var!(buff, Temple.Html), link)
     end

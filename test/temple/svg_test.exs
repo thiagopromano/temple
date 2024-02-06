@@ -40,9 +40,7 @@ defmodule Temple.SvgTest do
         end
 
       assert result ==
-               "<#{to_valid_tag(unquote(tag))}>&lt;div&gt;1&lt;/div&gt;</#{
-                 to_valid_tag(unquote(tag))
-               }>"
+               "<#{to_valid_tag(unquote(tag))}>&lt;div&gt;1&lt;/div&gt;</#{to_valid_tag(unquote(tag))}>"
     end
 
     test "renders a #{tag} with attrs and content" do
@@ -62,9 +60,7 @@ defmodule Temple.SvgTest do
         end
 
       assert result ==
-               ~s{<#{to_valid_tag(unquote(tag))}><#{to_valid_tag(unquote(tag))}></#{
-                 to_valid_tag(unquote(tag))
-               }></#{to_valid_tag(unquote(tag))}>}
+               ~s{<#{to_valid_tag(unquote(tag))}><#{to_valid_tag(unquote(tag))}></#{to_valid_tag(unquote(tag))}></#{to_valid_tag(unquote(tag))}>}
     end
 
     test "renders a #{tag} with attrs and a block" do
@@ -76,9 +72,7 @@ defmodule Temple.SvgTest do
         end
 
       assert result ==
-               ~s{<#{to_valid_tag(unquote(tag))} class="hello"><#{to_valid_tag(unquote(tag))}></#{
-                 to_valid_tag(unquote(tag))
-               }></#{to_valid_tag(unquote(tag))}>}
+               ~s{<#{to_valid_tag(unquote(tag))} class="hello"><#{to_valid_tag(unquote(tag))}></#{to_valid_tag(unquote(tag))}></#{to_valid_tag(unquote(tag))}>}
     end
   end
 

@@ -1,9 +1,9 @@
 defmodule Temple.Form do
   @moduledoc """
-  This modules wraps all of the functions from the `Phoenix.HTML.Form` module to make them compatible with with Temple.
+  This modules wraps all of the functions from the `PhoenixHTMLHelpers.Form` module to make them compatible with with Temple.
   """
 
-  alias Phoenix.HTML
+  alias PhoenixHTMLHelpers
   alias Temple.Utils
 
   @doc """
@@ -22,7 +22,7 @@ defmodule Temple.Form do
 
   The form builder will be available inside the block through the `form` variable.
 
-  This is a wrapper around the `Phoenix.HTML.Form.form_for/4` function and accepts all of the same options.
+  This is a wrapper around the `PhoenixHTMLHelpers.Form.form_for/4` function and accepts all of the same options.
 
   ## Example
 
@@ -43,12 +43,17 @@ defmodule Temple.Form do
   """
   defmacro form_for(form_data, action, opts \\ [], block) do
     quote location: :keep do
-      var!(form) = HTML.Form.form_for(unquote_splicing([form_data, action, opts]))
+      var!(form) = Phoenix.HTML.FormData.to_form(unquote_splicing([form_data, opts]))
 
-      Utils.put_buffer(var!(buff, Temple.Html), var!(form) |> HTML.Safe.to_iodata())
+      Utils.put_buffer(var!(buff, Temple.Html), Map.put(var!(form), :action, unquote(action))  |> form_to_iodata())
       _ = unquote(block)
       Utils.put_buffer(var!(buff, Temple.Html), "</form>")
     end
+  end
+
+  def form_to_iodata(%{action: action, options: options}) do
+    {:safe, contents} = PhoenixHTMLHelpers.Tag.form_tag(action, options)
+    contents
   end
 
   @helpers [
@@ -74,14 +79,14 @@ defmodule Temple.Form do
 
   for helper <- @helpers do
     @doc """
-    Please see `Phoenix.HTML.Form.#{helper}/3` for details.
+    Please see `PhoenixHTMLHelpers.Form.#{helper}/3` for details.
     """
     defmacro unquote(helper)(form, field, opts \\ []) do
       helper = unquote(helper)
 
       quote location: :keep do
         {:safe, input} =
-          apply(Phoenix.HTML.Form, unquote(helper), [unquote_splicing([form, field, opts])])
+          apply(PhoenixHTMLHelpers.Form, unquote(helper), [unquote_splicing([form, field, opts])])
 
         Utils.put_buffer(var!(buff, Temple.Html), input)
       end
@@ -89,35 +94,35 @@ defmodule Temple.Form do
   end
 
   @doc """
-  Please see `Phoenix.HTML.Form.textarea/3` for details.
+  Please see `PhoenixHTMLHelpers.Form.textarea/3` for details.
 
   Note: Temple defines this function as `text_area` with an underscore, whereas Phoenix.HTML defines it as `textarea` without an underscore.
   """
   defmacro text_area(form, field, opts \\ []) do
     quote location: :keep do
-      {:safe, input} = Phoenix.HTML.Form.textarea(unquote_splicing([form, field, opts]))
+      {:safe, input} = PhoenixHTMLHelpers.Form.textarea(unquote_splicing([form, field, opts]))
 
       Utils.put_buffer(var!(buff, Temple.Html), input)
     end
   end
 
   @doc """
-  Please see `Phoenix.HTML.Form.reset/2` for details.
+  Please see `PhoenixHTMLHelpers.Form.reset/2` for details.
   """
   defmacro reset(value, opts \\ []) do
     quote location: :keep do
-      {:safe, input} = Phoenix.HTML.Form.reset(unquote_splicing([value, opts]))
+      {:safe, input} = PhoenixHTMLHelpers.Form.reset(unquote_splicing([value, opts]))
 
       Utils.put_buffer(var!(buff, Temple.Html), input)
     end
   end
 
   @doc """
-  Please see `Phoenix.HTML.Form.submit/1` for details.
+  Please see `PhoenixHTMLHelpers.Form.submit/1` for details.
   """
   defmacro submit(do: block) do
     quote location: :keep do
-      {:safe, input} = Phoenix.HTML.Form.submit(do: temple(do: unquote(block)))
+      {:safe, input} = PhoenixHTMLHelpers.Form.submit(do: temple(do: unquote(block)))
 
       Utils.put_buffer(var!(buff, Temple.Html), input)
     end
@@ -125,18 +130,19 @@ defmodule Temple.Form do
 
   defmacro submit(value) do
     quote location: :keep do
-      {:safe, input} = Phoenix.HTML.Form.submit(unquote(value))
+      {:safe, input} = PhoenixHTMLHelpers.Form.submit(unquote(value))
 
       Utils.put_buffer(var!(buff, Temple.Html), input)
     end
   end
 
   @doc """
-  Please see `Phoenix.HTML.Form.submit/1` for details.
+  Please see `PhoenixHTMLHelpers.Form.submit/1` for details.
   """
   defmacro submit(opts, do: block) do
     quote location: :keep do
-      {:safe, input} = Phoenix.HTML.Form.submit(unquote(opts), do: temple(do: unquote(block)))
+      {:safe, input} =
+        PhoenixHTMLHelpers.Form.submit(unquote(opts), do: temple(do: unquote(block)))
 
       Utils.put_buffer(var!(buff, Temple.Html), input)
     end
@@ -144,30 +150,32 @@ defmodule Temple.Form do
 
   defmacro submit(value, opts) do
     quote location: :keep do
-      {:safe, input} = Phoenix.HTML.Form.submit(unquote_splicing([value, opts]))
+      {:safe, input} = PhoenixHTMLHelpers.Form.submit(unquote_splicing([value, opts]))
 
       Utils.put_buffer(var!(buff, Temple.Html), input)
     end
   end
 
   @doc """
-  Please see `Phoenix.HTML.Form.label/2` for details.
+  Please see `PhoenixHTMLHelpers.Form.label/2` for details.
   """
   defmacro phx_label(form, field) do
     quote location: :keep do
-      {:safe, input} = Phoenix.HTML.Form.label(unquote_splicing([form, field]))
+      {:safe, input} = PhoenixHTMLHelpers.Form.label(unquote_splicing([form, field]))
 
       Utils.put_buffer(var!(buff, Temple.Html), input)
     end
   end
 
   @doc """
-  Please see `Phoenix.HTML.Form.label/3` for details.
+  Please see `PhoenixHTMLHelpers.Form.label/3` for details.
   """
   defmacro phx_label(form, field, do: block) do
     quote location: :keep do
       {:safe, input} =
-        Phoenix.HTML.Form.label(unquote_splicing([form, field]), do: temple(do: unquote(block)))
+        PhoenixHTMLHelpers.Form.label(unquote_splicing([form, field]),
+          do: temple(do: unquote(block))
+        )
 
       Utils.put_buffer(var!(buff, Temple.Html), input)
     end
@@ -175,19 +183,20 @@ defmodule Temple.Form do
 
   defmacro phx_label(form, field, text_or_opts) do
     quote location: :keep do
-      {:safe, input} = Phoenix.HTML.Form.label(unquote_splicing([form, field, text_or_opts]))
+      {:safe, input} =
+        PhoenixHTMLHelpers.Form.label(unquote_splicing([form, field, text_or_opts]))
 
       Utils.put_buffer(var!(buff, Temple.Html), input)
     end
   end
 
   @doc """
-  Please see `Phoenix.HTML.Form.label/4` for details.
+  Please see `PhoenixHTMLHelpers.Form.label/4` for details.
   """
   defmacro phx_label(form, field, opts, do: block) do
     quote location: :keep do
       {:safe, input} =
-        Phoenix.HTML.Form.label(unquote_splicing([form, field, opts]),
+        PhoenixHTMLHelpers.Form.label(unquote_splicing([form, field, opts]),
           do: temple(do: unquote(block))
         )
 
@@ -197,42 +206,43 @@ defmodule Temple.Form do
 
   defmacro phx_label(form, field, text, opts) do
     quote location: :keep do
-      {:safe, input} = Phoenix.HTML.Form.label(unquote_splicing([form, field, text, opts]))
+      {:safe, input} = PhoenixHTMLHelpers.Form.label(unquote_splicing([form, field, text, opts]))
 
       Utils.put_buffer(var!(buff, Temple.Html), input)
     end
   end
 
   @doc """
-  Please see `Phoenix.HTML.Form.radio_button/4` for details.
+  Please see `PhoenixHTMLHelpers.Form.radio_button/4` for details.
   """
   defmacro radio_button(form, field, value, attrs \\ []) do
     quote location: :keep do
       {:safe, input} =
-        Phoenix.HTML.Form.radio_button(unquote_splicing([form, field, value, attrs]))
+        PhoenixHTMLHelpers.Form.radio_button(unquote_splicing([form, field, value, attrs]))
 
       Utils.put_buffer(var!(buff, Temple.Html), input)
     end
   end
 
   @doc """
-  Please see `Phoenix.HTML.Form.multiple_select/4` for details.
+  Please see `PhoenixHTMLHelpers.Form.multiple_select/4` for details.
   """
   defmacro multiple_select(form, field, options, attrs \\ []) do
     quote location: :keep do
       {:safe, input} =
-        Phoenix.HTML.Form.multiple_select(unquote_splicing([form, field, options, attrs]))
+        PhoenixHTMLHelpers.Form.multiple_select(unquote_splicing([form, field, options, attrs]))
 
       Utils.put_buffer(var!(buff, Temple.Html), input)
     end
   end
 
   @doc """
-  Please see `Phoenix.HTML.Form.select/4` for details.
+  Please see `PhoenixHTMLHelpers.Form.select/4` for details.
   """
   defmacro select(form, field, options, attrs \\ []) do
     quote location: :keep do
-      {:safe, input} = Phoenix.HTML.Form.select(unquote_splicing([form, field, options, attrs]))
+      {:safe, input} =
+        PhoenixHTMLHelpers.Form.select(unquote_splicing([form, field, options, attrs]))
 
       Utils.put_buffer(var!(buff, Temple.Html), input)
     end
@@ -243,7 +253,7 @@ defmodule Temple.Form do
 
   The form builder will be available inside the block through the `inner_form` variable.
 
-  This is a wrapper around the `Phoenix.HTML.Form.inputs_for/4` function and accepts all of the same options.
+  This is a wrapper around the `PhoenixHTMLHelpers.Form.inputs_for/4` function and accepts all of the same options.
 
   ## Example
 
@@ -289,7 +299,7 @@ defmodule Temple.Form do
       form.impl.to_form(form.source, form, field, options)
       |> Enum.each(fn form ->
         Enum.map(form.hidden, fn {k, v} ->
-          {:safe, hidden_input} = Phoenix.HTML.Form.hidden_input(form, k, value: v)
+          {:safe, hidden_input} = PhoenixHTMLHelpers.Form.hidden_input(form, k, value: v)
 
           hidden_input
         end)
