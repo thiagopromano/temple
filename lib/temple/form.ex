@@ -45,13 +45,13 @@ defmodule Temple.Form do
     quote location: :keep do
       var!(form) = Phoenix.HTML.FormData.to_form(unquote_splicing([form_data, opts]))
 
-      Utils.put_buffer(var!(buff, Temple.Html), Map.put(var!(form), :action, unquote(action))  |> form_to_iodata())
+      Utils.put_buffer(var!(buff, Temple.Html), var!(form) |> form_to_iodata(unquote(action)))
       _ = unquote(block)
       Utils.put_buffer(var!(buff, Temple.Html), "</form>")
     end
   end
 
-  def form_to_iodata(%{action: action, options: options}) do
+  def form_to_iodata(%{options: options}, action) do
     {:safe, contents} = PhoenixHTMLHelpers.Tag.form_tag(action, options)
     contents
   end
